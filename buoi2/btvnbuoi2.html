@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BTVNBUOI2</title>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 30px;
+      }
+
+      .container {
+        width: 400px;
+        max-width: 100%;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-sizing: border-box;
+      }
+
+      h2 {
+        text-align: center;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        padding: 12px;
+        margin-bottom: 8px;
+        background-color: #eeeeee;
+        border-radius: 5px;
+        cursor: pointer;
+        overflow-wrap: anywhere;
+      }
+
+      li.done {
+        text-decoration: line-through;
+        color: gray;
+        background-color: #d9f2d9;
+      }
+
+      #count {
+        text-align: center;
+        font-weight: bold;
+        margin-top: 20px;
+      }
+
+      .note {
+        font-size: 13px;
+        color: gray;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h2>Danh sách đi chợ</h2>
+
+      <input type="text" id="itemInput" placeholder="Nhập tên món" />
+
+      <ul id="shoppingList"></ul>
+
+      <p id="count">Số lượng : 0/0</p>
+
+      <p class="note">
+        - Bấm một lần để đánh dấu đã mua.<br />
+        - Nháy đúp để xóa món.
+      </p>
+    </div>
+
+    <script>
+      const itemInput = document.getElementById("itemInput");
+      const shoppingList = document.getElementById("shoppingList");
+      const count = document.getElementById("count");
+
+      let items = JSON.parse(localStorage.getItem("shoppingItems")) || [];
+
+      function saveItems() {
+        localStorage.setItem("shoppingItems", JSON.stringify(items));
+      }
+
+      function updateCount() {
+        const total = items.length;
+        const remaining = items.filter((item) => !item.done).length;
+
+        count.textContent = `Số lượng : ${remaining}/${total}`;
+      }
+
+      function renderList() {
+        shoppingList.innerHTML = "";
+
+        items.forEach((item, index) => {
+          const li = document.createElement("li");
+
+          li.textContent = item.name;
+
+          if (item.done) {
+            li.classList.add("done");
+          }
+
+          li.addEventListener("click", function () {
+            items[index].done = !items[index].done;
+            saveItems();
+            renderList();
+          });
+
+          li.addEventListener("dblclick", function (event) {
+            event.preventDefault();
+
+            items.splice(index, 1);
+            saveItems();
+            renderList();
+          });
+
+          shoppingList.appendChild(li);
+        });
+
+        updateCount();
+      }
+
+      itemInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+          const name = itemInput.value.trim();
+
+          if (name === "") {
+            return;
+          }
+
+          items.push({
+            name: name,
+            done: false,
+          });
+
+          saveItems();
+          renderList();
+
+          itemInput.value = "";
+        }
+      });
+
+      renderList();
+    </script>
+  </body>
+</html>
